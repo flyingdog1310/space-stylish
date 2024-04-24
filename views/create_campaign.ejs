@@ -1,0 +1,16 @@
+<%- include('header') -%>
+<div id="header-stuff"></div>
+<h4>Please fill in</h4>
+<form action="/admin/create_campaign" method="POST" enctype="multipart/form-data" id="create-campaign">
+    <div><label for="product_id">product id:</label><input id="product_id" name="product_id" required="required" />
+    </div>
+    <div> <label for="picture">picture: </label><input id="picture" name="picture" type="file"
+            accept="image/png, image/jpeg, image/jpg" required="required" /></div>
+    <div><label for="story">story:</label><textarea id="story" name="story" placeholder="" maxlength="255"
+            required="required"> </textarea></div>
+    <div id="submit"> <button class="btn" type="submit">Create Campaign</button></div>
+</form>
+<script>
+    import(`/public/js/create_campaign.js`)
+</script>
+<%- include('footer') -%>

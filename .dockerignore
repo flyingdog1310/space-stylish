@@ -1,0 +1,11 @@
+./docs
+./sql
+./test
+./README.md
+./package.json
+./.env.example
+./.eslintrc
+./.gitignore
+./.prettierrc
+./.git
+./.prettierrc

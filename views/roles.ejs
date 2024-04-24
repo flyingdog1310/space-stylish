@@ -1,0 +1,17 @@
+<%- include('header') -%>
+    <div id="header-stuff"></div>
+    <form action="/admin/create_role" method="POST" enctype="multipart/form-data" id="create-role">
+        <p>1=授權 0=未授權 </p>
+        <p>賦予用戶權限-創商品-創行銷活動--結帳</p>
+        <p>admin=1111 / merchant=0101 / marketing=0011 / user=0001</p><label for="role">Role</label><input id="role"
+            name="role" /><label for="access">Access</label><input id="access" name="access" /><button class="btn"
+            type="submit">create role</button>
+    </form>
+    <form action="/admin/assign_role" method="POST" enctype="multipart/form-data" id="assign-role"><label
+            for="userId">UserId </label><input id="userId" name="userId" /><label for="roleId">RoleId</label><input
+            id="roleId" name="roleId" /><button class="btn" type="submit">assign role</button></form>
+    <script>
+        import(`/public/js/layout.js`)
+        import(`/public/js/roles.js`)
+    </script>
+<%- include('footer') -%>
