@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Space-Stylish API 文檔</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui.css" />
+    <link rel="stylesheet" type="text/css" href="/public/css/index.css">
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+
+        .swagger-ui .topbar {
+            background-color: #2c3e50;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper .select-label {
+            color: #fff;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper input[type=text] {
+            border: 2px solid #34495e;
+        }
+
+        .swagger-ui .info .title {
+            color: #2c3e50;
+        }
+
+        .swagger-ui .scheme-container {
+            background: #ecf0f1;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, .15);
+        }
+
+        #swagger-ui {
+            margin-top: 20px;
+        }
+
+        .api-docs-header {
+            background: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .api-docs-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .api-docs-header p {
+            margin: 10px 0 0 0;
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('header') %>
+
+        <div class="api-docs-header">
+            <h1>Space-Stylish API 文檔</h1>
+            <p>完整的電商平台 API 文檔，包含用戶管理、產品、訂單、行銷等功能</p>
+        </div>
+
+        <div id="swagger-ui"></div>
+
+        <%- include('footer') %>
+
+            <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-bundle.js"></script>
+            <script src="https://unpkg.com/swagger-ui-dist@5.9.0/swagger-ui-standalone-preset.js"></script>
+            <script>
+                window.onload = function () {
+                    // load swagger.yaml file
+                    fetch('/public/docs/swagger.yaml')
+                        .then(response => response.text())
+                        .then(yamlText => {
+                            // use js-yaml to parse YAML (if needed, we directly use the result of fetch)
+                            const ui = SwaggerUIBundle({
+                                url: '/public/docs/swagger.yaml',
+                                dom_id: '#swagger-ui',
+                                deepLinking: true,
+                                presets: [
+                                    SwaggerUIBundle.presets.apis,
+                                    SwaggerUIStandalonePreset
+                                ],
+                                plugins: [
+                                    SwaggerUIBundle.plugins.DownloadUrl
+                                ],
+                                layout: "StandaloneLayout",
+                                validatorUrl: null,
+                                docExpansion: 'list',
+                                filter: true,
+                                showRequestHeaders: true,
+                                tryItOutEnabled: true,
+                                requestInterceptor: function (request) {
+                                    // 添加 CORS 支援
+                                    request.headers['Access-Control-Allow-Origin'] = '*';
+                                    return request;
+                                },
+                                responseInterceptor: function (response) {
+                                    return response;
+                                }
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error loading swagger.yaml:', error);
+                            document.getElementById('swagger-ui').innerHTML = `
+                        <div style="padding: 20px; text-align: center;">
+                            <h2>無法載入 API 文檔</h2>
+                            <p>請確保 swagger.yaml 文件存在於正確位置。</p>
+                            <p>錯誤訊息: ${error.message}</p>
+                        </div>
+                    `;
+                        });
+                };
+            </script>
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Facebook Login </title>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <script>
+        let body = {};
+        let url = "http://localhost:8080/api/1.0/user/signin"
+        body.provider = "facebook"
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId: "937568653918476",
+                cookie: true,
+                xfbml: true,
+                version: "v16.0"
+            });
+        };
+
+        function passData(url, token) {
+            body.access_token = token;
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "content-type": 'application/json'
+                },
+                body: JSON.stringify(body)
+            }, ).then(response => response.json()).then(json => console.log(json));
+        }
+    </script>
+    <div id="fb-root"></div>
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&amp;version=v16.0&amp;appId=937568653918476&amp;autoLogAppEvents=1" nonce="Mw4NSwET"></script><button id="facebook_log_in" onclick="window.FB.login( function(res) { passData( url , res.authResponse.accessToken) }, {scope: 'public_profile,email'} ) ">ugly button with facebook</button></body>
+
+</html>

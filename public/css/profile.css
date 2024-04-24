@@ -1,0 +1,25 @@
+#log {
+    display: flex;
+    flex-direction: column;
+    width: 70vw;
+    align-self: center;
+}
+#sign-up {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 50px;
+    align-items: center;
+}
+
+#sign-in {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 50px;
+    align-items: center;
+}
+#profile {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 50px;
+    align-items: center;
+}

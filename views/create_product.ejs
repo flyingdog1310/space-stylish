@@ -1,0 +1,54 @@
+<%- include('header') -%>
+<link rel="stylesheet" href="/public/css/create_product.css" />
+<div id="header-stuff"></div>
+<h4>Please fill in</h4>
+<form action="/admin/create_product" method="POST" enctype="multipart/form-data" id="product-form">
+    <div><label for="category">category:</label><select id="category" name="category" required="required">
+            <option value="men">men </option>
+            <option value="women">women </option>
+            <option value="accessories">accessories</option>
+        </select></div>
+    <div> <label for="title">title: </label><input id="title" name="title" type="text" placeholder="厚實毛呢格子外套(max:32)"
+            maxlength="32" required="required" /></div>
+    <div><label for="description">description:</label><input id="description" name="description" type="text"
+            placeholder="高抗寒素材選用，保暖也時尚有型" maxlength="255" required="required" /></div>
+    <div> <label for="price">price: </label><input id="price" name="price" type="number" placeholder="2200" min="0"
+            required="required" /></div>
+    <div><label for="texture">texture:</label><input id="texture" name="texture" type="text"
+            placeholder="棉、聚脂纖維 (max:32)" maxlength="32" required="required" /></div>
+    <div> <label for="wash">wash: </label><input id="wash" name="wash" type="text" placeholder="手洗(水溫40度 (max:32)"
+            maxlength="32" required="required" /></div>
+    <div><label for="place">place:</label><input id="place" name="place" type="text" placeholder="韓國 (max:32)"
+            maxlength="32" required="required" /></div>
+    <div> <label for="note">note: </label><input id="note" name="note" type="text" placeholder="實品顏色以單品照為主 (max:64)"
+            maxlength="64" required="required" /></div>
+    <div><label for="story">story:</label><input id="story" name="story" type="text" placeholder="你絕對不能錯過的超值商品"
+            required="required" /></div>
+    <div id="variants_form"> <label for="color_name">color name: </label><input id="variants[0][color_name]"
+            name="variants[0][color_name]" type="text" placeholder="白色" maxlength="16" required="required" /><label
+            for="color_code">color code: </label><input id="variants[0][color_code]" name="variants[0][color_code]"
+            type="text" maxlength="6" placeholder="FFFFFF" required="required" /><label for="size">size: </label><select
+            id="variants[0][size]" name="variants[0][size]" required="required">
+            <option value="XS">XS</option>
+            <option value="S">S</option>
+            <option value="M">M </option>
+            <option value="L">L </option>
+            <option value="XL">XL </option>
+            <option value="2XL">2XL</option>
+        </select>
+        <label for="stock">stock:</label><input id="variants[0][stock]" name="variants[0][stock]" type="number"
+            placeholder="5" min="0" max="32767" required="required" /><button type="button" id="more_variants">More
+            Variants</button>
+    </div>
+    <div id="variants_form1"> </div>
+    <div><label for="main_image">main image: </label><input id="main_image" name="main_image" type="file"
+            accept="image/png, image/jpeg, image/jpg" required="required" /></div>
+    <div id="images_form"> <label for="image">other images: </label><input id="images" name="images" type="file"
+            multiple="multiple" accept="image/png, image/jpeg, image/jpg" /></div>
+    <div id="submit"> <button type="submit">Create Product</button></div>
+</form>
+
+<script>
+    import(`/public/js/create_product.js`)
+</script>
+<%- include('footer') -%>

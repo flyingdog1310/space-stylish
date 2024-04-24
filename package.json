@@ -1,0 +1,28 @@
+{
+  "name": "space-stylish",
+  "version": "1.0.0",
+  "description": "e-commerce website",
+  "type": "module",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/flyingdog1310/space-stylish.git"
+  },
+  "scripts": {
+    "dev": "node --env-file=.env app.js"
+  },
+  "author": "flyingdog1310",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.787.0",
+    "argon2": "^0.41.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "ioredis": "^5.6.1",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.2",
+    "multer-s3": "^3.0.1",
+    "mysql2": "^3.1.2",
+    "socket.io": "^4.8.1"
+  }
+}

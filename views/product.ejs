@@ -1,0 +1,47 @@
+<%- include('header') -%>
+    <div id="header-stuff"></div>
+    <div id="product-page">
+        <div id="product-top"><img id="product-main-img" />
+            <div id="product-info">
+                <h1 id="product-title"></h1>
+                <p id="product-id"> </p>
+                <h3 id="product-price"> </h3>
+                <hr id="product-top-hr" />
+                <form id="variants-form">
+                    <div class="product-variants" id="product-color">
+                        <p class="product-tag" id="product-color-tag">顏色</p>
+                    </div>
+                    <div class="product-variants" id="product-size">
+                        <p class="product-tag" id="product-size-tag">尺寸</p>
+                    </div>
+                    <div class="product-variants" id="product-qty">
+                        <p class="product-tag" id="product-qty-tag">數量</p>
+                        <div id="qty-box"><button type="button" id="minus">-</button><input id="qty" type="number"
+                                min="1" value="1" /><button type="button" id="plus">+</button></div>
+                        <p id="stock"></p>
+                    </div><button id="add-cart" disabled="disabled">請選擇顏色</button>
+                </form>
+                <p class="product-note" id="product-note"> </p>
+                <p class="product-note" id="product-texture"> </p>
+                <p class="product-note" id="product-description"> </p>
+                <p class="product-note" id="product-place"> </p>
+            </div>
+        </div>
+        <div id="product-bottom">
+            <div id="product-details">
+                <div id="details-wrapper">
+                    <p id="details">更多產品資訊 </p>
+                </div>
+                <div id="product-bottom-hr-wrapper">
+                    <hr id="product-bottom-hr" />
+                </div>
+            </div>
+            <p id="product-story"> </p>
+            <div id="product-images"></div>
+        </div>
+    </div>
+    <script>
+        import(`/public/js/layout.js`)
+        import(`/public/js/product.js`)
+    </script>
+    <%- include('footer') -%>

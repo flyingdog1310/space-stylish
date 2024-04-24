@@ -1,0 +1,12 @@
+.tpfield {
+    height: 40px;
+    width: 300px;
+    border: 1px solid gray;
+    margin: 5px 0;
+    padding: 5px;
+}
+#card-pay {
+    display: flex;
+    flex-direction: column;
+    align-self: center;
+}

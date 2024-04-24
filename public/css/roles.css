@@ -1,0 +1,12 @@
+#create-role {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 50px;
+    align-items: center;
+}
+#assign-role {
+    display: flex;
+    flex-direction: column;
+    padding-bottom: 50px;
+    align-items: center;
+}
