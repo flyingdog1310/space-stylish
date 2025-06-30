@@ -5,7 +5,7 @@ let search = "";
 let campaigns;
 let products;
 
-$.getJSON(`${window.location.origin}/api/1.0/marketing/campaigns`, function (campaigns) {
+$.getJSON(`${window.location.origin}/api/v1/marketing/campaigns`, function (campaigns) {
     $("#campaign-picture").prop("src", `${campaigns.data[0].picture}`);
     $("#campaign-link").prop(`href`, `${window.location.origin}/product?id=${campaigns.data[0].product_id}`);
     const storyAll = campaigns.data[0].story;
@@ -30,66 +30,56 @@ if (
 if (searchParams.get("keyword") !== null) {
     search = searchParams.get("keyword");
 }
-if (search == "") {
-    $.getJSON(`${window.location.origin}/api/1.0/products/${category}`, function (products) {
-        if (products.data === undefined) {
-            $(".product-row").css("display", "none");
-            $("#no-result").text("currently no product to show");
-            return;
+
+// 使用 ProductAPI 類別來獲取產品
+async function loadProducts() {
+    try {
+        if (search == "") {
+            const products = await window.ProductAPI.getProducts(category);
+            displayProducts(products);
+        } else {
+            const products = await window.ProductAPI.searchProducts(search);
+            displayProducts(products);
         }
-        if (products.data.length <= 3) {
-            $("#bottom-row").css("display", "none");
-        }
-        for (let i = 0; i < products.data.length; i++) {
-            $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data[i].id}`);
-            $(`#product${i}-img`).ready(function () {
-                $(`#product${i}-img`).css("background-image", `url(${products.data[i].main_image})`);
-            });
-            for (let j = 0; j < products.data[i].colors.length; j++) {
-                $("<div>", {
-                    id: `product${i}-color-block${j}`,
-                    class: `product-color-block`,
-                    style: `background-color: #${products.data[i].colors[j].code}`,
-                }).appendTo(`#product${i}-color`);
-            }
-            $(`#product${i}-name`).ready(function () {
-                $(`#product${i}-name`).text(products.data[i].title);
-            });
-            $(`#product${i}-price`).ready(function () {
-                $(`#product${i}-price`).text(`TWD.${products.data[i].price}`);
-            });
-        }
-    });
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        $(".product-row").css("display", "none");
+        $("#no-result").text("currently no product to show");
+    }
 }
 
-if (search !== "") {
-    $.getJSON(`${window.location.origin}/api/1.0/products/search?keyword=${search}`, function (products) {
-        if (products.data === undefined) {
-            $(".product-row").css("display", "none");
-            $("#no-result").text("currently no product to show");
-            return;
+// 顯示產品的函數
+function displayProducts(products) {
+    if (products.data === undefined || products.data.length === 0) {
+        $(".product-row").css("display", "none");
+        $("#no-result").text("currently no product to show");
+        return;
+    }
+
+    if (products.data.length <= 3) {
+        $("#bottom-row").css("display", "none");
+    }
+
+    for (let i = 0; i < products.data.length; i++) {
+        $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data[i].id}`);
+        $(`#product${i}-img`).ready(function () {
+            $(`#product${i}-img`).css("background-image", `url(${products.data[i].main_image})`);
+        });
+        for (let j = 0; j < products.data[i].colors.length; j++) {
+            $("<div>", {
+                id: `product${i}-color-block${j}`,
+                class: `product-color-block`,
+                style: `background-color: #${products.data[i].colors[j].code}`,
+            }).appendTo(`#product${i}-color`);
         }
-        if (products.data.length <= 3) {
-            $("#bottom-row").css("display", "none");
-        }
-        for (let i = 0; i < products.data.length; i++) {
-            $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data[i].id}`);
-            $(`#product${i}-img`).ready(function () {
-                $(`#product${i}-img`).css("background-image", `url(${products.data[i].main_image})`);
-            });
-            for (let j = 0; j < products.data[i].colors.length; j++) {
-                $("<div>", {
-                    id: `product${i}-color-block${j}`,
-                    class: `product-color-block`,
-                    style: `background-color: #${products.data[i].colors[j].code}`,
-                }).appendTo(`#product${i}-color`);
-            }
-            $(`#product${i}-name`).ready(function () {
-                $(`#product${i}-name`).text(products.data[i].title);
-            });
-            $(`#product${i}-price`).ready(function () {
-                $(`#product${i}-price`).text(`TWD.${products.data[i].price}`);
-            });
-        }
-    });
+        $(`#product${i}-name`).ready(function () {
+            $(`#product${i}-name`).text(products.data[i].title);
+        });
+        $(`#product${i}-price`).ready(function () {
+            $(`#product${i}-price`).text(`TWD.${products.data[i].price}`);
+        });
+    }
 }
+
+// 載入產品
+loadProducts();

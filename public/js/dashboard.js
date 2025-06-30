@@ -1,6 +1,6 @@
 $.ajax({
     type: "GET",
-    url: "/api/1.0/report/total",
+    url: "/api/v1/report/total",
     success: function (data) {
         const total = data.total;
         $("#number").html(`<h1> Total Revenue : ${total}</h1>`);
@@ -8,7 +8,7 @@ $.ajax({
 });
 $.ajax({
     type: "GET",
-    url: "/api/1.0/report/sold_color_percent",
+    url: "/api/v1/report/sold_color_percent",
     success: function (totalSoldColor) {
         let data = [
             {
@@ -38,7 +38,7 @@ $.ajax({
 
 $.ajax({
     type: "GET",
-    url: "/api/1.0/report/sold_price_percent",
+    url: "/api/v1/report/sold_price_percent",
     success: function (soldPricePercent) {
         let data = [
             {
@@ -69,7 +69,7 @@ $.ajax({
 
 $.ajax({
     type: "GET",
-    url: "/api/1.0/report/top-five",
+    url: "/api/v1/report/top-five",
     success: function (topFiveSize) {
         let size1 = {
             x: [],

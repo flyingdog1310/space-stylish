@@ -4,7 +4,7 @@ $("#create-role").submit(function (e) {
     e.preventDefault();
     let formData = new FormData(this);
     $.ajax({
-        url: "/admin/create_role",
+        url: "/api/v1/admin/create_role",
         type: "POST",
         headers: {
             Authorization: "Bearer " + token,

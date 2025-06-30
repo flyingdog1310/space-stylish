@@ -10,8 +10,5 @@
     <form action="/admin/assign_role" method="POST" enctype="multipart/form-data" id="assign-role"><label
             for="userId">UserId </label><input id="userId" name="userId" /><label for="roleId">RoleId</label><input
             id="roleId" name="roleId" /><button class="btn" type="submit">assign role</button></form>
-    <script>
-        import(`/public/js/layout.js`)
-        import(`/public/js/roles.js`)
-    </script>
+    <script type="module" src="/public/js/roles-loader.js"></script>
 <%- include('footer') -%>

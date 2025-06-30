@@ -4,7 +4,7 @@ let id;
 id = searchParams.get("id");
 let info;
 
-$.getJSON(`${window.location.origin}/api/1.0/products/details?id=${id}`, function (products) {
+$.getJSON(`${window.location.origin}/api/v1/products/details?id=${id}`, function (products) {
     info = products;
     $("#product-main-img").prop(`src`, `${products.data.main_image}`);
     $(`#product-title`).text(`${products.data.title}`);

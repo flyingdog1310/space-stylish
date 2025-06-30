@@ -1,0 +1,317 @@
+{
+  "timestamp": "2025-06-30T15:03:18.713Z",
+  "summary": {
+    "totalEndpoints": 23,
+    "testedEndpoints": 8,
+    "passedTests": 6,
+    "failedTests": 2
+  },
+  "swaggerInfo": {
+    "title": "Space-Stylish E-commerce API",
+    "version": "1.0.0",
+    "description": "Space-Stylish E-commerce Website API Documentation\n\nThis is a complete e-commerce platform API that provides the following features:\n- User registration, login and profile management\n- Product browsing, search and detailed information\n- Shopping cart and order management\n- Marketing campaign management\n- Sales reports and analytics\n- Admin functions\n\n## Authentication\nMost APIs require JWT token authentication. Please include in the Authorization header:\n`Authorization: Bearer <your_jwt_token>`\n\n## Environment Variables\n- `API_VERSION`: API version (default: v1)\n- `SERVER_PORT`: Server port\n- `JWT_SIGN_SECRET`: JWT signing secret\n- `PARTNER_KEY`: TapPay partner key\n- `MERCHANT_ID`: TapPay merchant ID\n- `APP_ID`: Facebook App ID\n- `APP_SECRET`: Facebook App Secret\n"
+  },
+  "endpoints": [
+    {
+      "path": "/health-check",
+      "method": "GET",
+      "summary": "System health check",
+      "tags": [
+        "Health"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/user/signup",
+      "method": "POST",
+      "summary": "User registration",
+      "tags": [
+        "Authentication"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/user/signin",
+      "method": "POST",
+      "summary": "User login",
+      "tags": [
+        "Authentication"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/user/profile",
+      "method": "GET",
+      "summary": "Get user profile",
+      "tags": [
+        "Authentication"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/api/v1/products",
+      "method": "GET",
+      "summary": "Get all products",
+      "tags": [
+        "Products"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/products/{category}",
+      "method": "GET",
+      "summary": "Get products by category",
+      "tags": [
+        "Products"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/products/search",
+      "method": "GET",
+      "summary": "Search products",
+      "tags": [
+        "Products"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/products/details",
+      "method": "GET",
+      "summary": "Get product details",
+      "tags": [
+        "Products"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/order/checkout",
+      "method": "POST",
+      "summary": "Checkout",
+      "tags": [
+        "Orders"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/api/v1/marketing/campaigns",
+      "method": "GET",
+      "summary": "Get marketing campaigns",
+      "tags": [
+        "Marketing"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/report/payments",
+      "method": "GET",
+      "summary": "Get user payment statistics",
+      "tags": [
+        "Reports"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/report/total",
+      "method": "GET",
+      "summary": "Get total sales",
+      "tags": [
+        "Reports"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/report/sold_color_percent",
+      "method": "GET",
+      "summary": "Get color sales percentage",
+      "tags": [
+        "Reports"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/report/sold_price_percent",
+      "method": "GET",
+      "summary": "Get price range sales percentage",
+      "tags": [
+        "Reports"
+      ],
+      "security": []
+    },
+    {
+      "path": "/api/v1/report/top-five",
+      "method": "GET",
+      "summary": "Get top five best sellers",
+      "tags": [
+        "Reports"
+      ],
+      "security": []
+    },
+    {
+      "path": "/admin/create_role",
+      "method": "POST",
+      "summary": "Create role",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/assign_role",
+      "method": "POST",
+      "summary": "Assign role",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/create_product",
+      "method": "POST",
+      "summary": "Create product",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/create_campaign",
+      "method": "POST",
+      "summary": "Create marketing campaign",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/get_orders",
+      "method": "GET",
+      "summary": "Get order data",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/system/cache/status",
+      "method": "GET",
+      "summary": "Get cache service status",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/system/cache/health-check",
+      "method": "POST",
+      "summary": "Force cache health check",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    },
+    {
+      "path": "/admin/system/cache/reconnect",
+      "method": "POST",
+      "summary": "Force cache reconnection",
+      "tags": [
+        "Admin"
+      ],
+      "security": [
+        {
+          "bearerAuth": []
+        }
+      ]
+    }
+  ],
+  "testResults": [
+    {
+      "path": "/health-check",
+      "success": true,
+      "status": 200,
+      "details": "狀態碼: 200"
+    },
+    {
+      "path": "/api/v1/user/signup",
+      "success": false,
+      "status": 404,
+      "details": "狀態碼: 404"
+    },
+    {
+      "path": "/api/v1/user/signin",
+      "success": false,
+      "status": 404,
+      "details": "狀態碼: 404"
+    },
+    {
+      "path": "/api/v1/products",
+      "success": true,
+      "status": 200,
+      "details": "狀態碼: 200"
+    },
+    {
+      "path": "/api/v1/products/search",
+      "success": true,
+      "status": 400,
+      "details": "狀態碼: 400"
+    },
+    {
+      "path": "/api/v1/products/details",
+      "success": true,
+      "status": 400,
+      "details": "狀態碼: 400"
+    },
+    {
+      "path": "/api/v1/marketing/campaigns",
+      "success": true,
+      "status": 200,
+      "details": "狀態碼: 200"
+    },
+    {
+      "path": "/admin/overview",
+      "success": true,
+      "status": 401,
+      "details": "狀態碼: 401"
+    }
+  ],
+  "recommendations": [
+    "檢查失敗的端點實作",
+    "增加更多端點測試覆蓋率"
+  ]
+}

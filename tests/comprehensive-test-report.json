@@ -1,0 +1,27 @@
+{
+  "timestamp": "2025-06-30T15:03:18.625Z",
+  "suites": [
+    {
+      "name": "API 測試套件",
+      "success": false,
+      "details": "檢查後端 API 功能與 Swagger 文檔一致性"
+    },
+    {
+      "name": "Swagger 文檔驗證",
+      "success": false,
+      "details": "驗證後端 API 與 Swagger 文檔的一致性"
+    },
+    {
+      "name": "快取故障容錯測試",
+      "success": true,
+      "skipped": false,
+      "details": "測試快取服務的故障容錯機制"
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "passed": 1,
+    "failed": 2,
+    "successRate": "33.3"
+  }
+}

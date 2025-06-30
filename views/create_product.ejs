@@ -33,7 +33,7 @@
             <option value="S">S</option>
             <option value="M">M </option>
             <option value="L">L </option>
-            <option value="XL">XL </option>
+            <option value="XL">XL</option>
             <option value="2XL">2XL</option>
         </select>
         <label for="stock">stock:</label><input id="variants[0][stock]" name="variants[0][stock]" type="number"
@@ -48,7 +48,5 @@
     <div id="submit"> <button type="submit">Create Product</button></div>
 </form>
 
-<script>
-    import(`/public/js/create_product.js`)
-</script>
+<script type="module" src="/public/js/create-product-loader.js"></script>
 <%- include('footer') -%>

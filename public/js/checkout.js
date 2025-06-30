@@ -103,7 +103,7 @@ document.getElementById("pay").addEventListener(
   }
 );
 let body = {};
-let url = `${window.location.origin}/api/1.0/order/checkout`;
+let url = `${window.location.origin}/api/v1/order/checkout`;
 function passData(jwt, url, prime, subtotal, freight, name, phone, email, address, time, list) {
   body = {
     prime: prime,

@@ -4,7 +4,7 @@ $("#create-campaign").submit(function (e) {
     e.preventDefault();
     let formData = new FormData(this);
     $.ajax({
-        url: "/admin/create_campaign",
+        url: "/api/v1/admin/create_campaign",
         type: "POST",
         headers: {
             Authorization: "Bearer " + token,

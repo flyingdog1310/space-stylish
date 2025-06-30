@@ -4,7 +4,7 @@ if (token === null) {
 } else {
   $.ajax({
     type: "GET",
-    url: "/api/1.0/user/profile",
+    url: "/api/v1/user/profile",
     beforeSend: function (xhr) {
       xhr.setRequestHeader("Authorization", `Bearer ${token}`);
     },

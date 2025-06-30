@@ -1,0 +1,1290 @@
+openapi: 3.0.3
+info:
+  title: Space-Stylish E-commerce API
+  description: |
+    Space-Stylish E-commerce Website API Documentation
+
+    This is a complete e-commerce platform API that provides the following features:
+    - User registration, login and profile management
+    - Product browsing, search and detailed information
+    - Shopping cart and order management
+    - Marketing campaign management
+    - Sales reports and analytics
+    - Admin functions
+
+    ## Authentication
+    Most APIs require JWT token authentication. Please include in the Authorization header:
+    `Authorization: Bearer <your_jwt_token>`
+
+    ## Environment Variables
+    - `API_VERSION`: API version (default: v1)
+    - `SERVER_PORT`: Server port
+    - `JWT_SIGN_SECRET`: JWT signing secret
+    - `PARTNER_KEY`: TapPay partner key
+    - `MERCHANT_ID`: TapPay merchant ID
+    - `APP_ID`: Facebook App ID
+    - `APP_SECRET`: Facebook App Secret
+
+  version: 1.0.0
+  contact:
+    name: Space-Stylish Team
+    email: support@space-stylish.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:3000
+    description: Local development environment
+  - url: https://api.space-stylish.com
+    description: Production environment
+
+tags:
+  - name: Authentication
+    description: User authentication related APIs
+  - name: Products
+    description: Product related APIs
+  - name: Orders
+    description: Order related APIs
+  - name: Marketing
+    description: Marketing campaign related APIs
+  - name: Reports
+    description: Report and analytics APIs
+  - name: Admin
+    description: Admin function APIs
+  - name: Health
+    description: System health check
+
+paths:
+  # Health check
+  /health-check:
+    get:
+      tags:
+        - Health
+      summary: System health check
+      description: Check if the API service is running normally
+      responses:
+        "200":
+          description: Service is normal
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "ok"
+
+  # User authentication APIs
+  /api/v1/user/signup:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Create a new user account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - email
+                - password
+              properties:
+                name:
+                  type: string
+                  description: User name
+                  example: "John Doe"
+                email:
+                  type: string
+                  format: email
+                  description: User email
+                  example: "john@example.com"
+                password:
+                  type: string
+                  description: User password
+                  example: "password123"
+      responses:
+        "200":
+          description: Registration successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        description: JWT access token
+                      access_expired:
+                        type: integer
+                        description: Token expiration time (seconds)
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          email:
+                            type: string
+                          picture:
+                            type: string
+        "400":
+          description: Request parameter error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "email format is wrong"
+        "403":
+          description: Email already exists
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "email already exist"
+
+  /api/v1/user/signin:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: User login (supports native login and Facebook login)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required:
+                    - provider
+                    - email
+                    - password
+                  properties:
+                    provider:
+                      type: string
+                      enum: [native]
+                      description: Login method
+                    email:
+                      type: string
+                      format: email
+                      description: User email
+                    password:
+                      type: string
+                      description: User password
+                - type: object
+                  required:
+                    - provider
+                    - access_token
+                  properties:
+                    provider:
+                      type: string
+                      enum: [facebook]
+                      description: Login method
+                    access_token:
+                      type: string
+                      description: Facebook access token
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        description: JWT access token
+                      access_expired:
+                        type: integer
+                        description: Token expiration time (seconds)
+                      user:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          name:
+                            type: string
+                          email:
+                            type: string
+                          picture:
+                            type: string
+        "400":
+          description: Request parameter error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Email is not registered"
+        "403":
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Password is wrong"
+
+  /api/v1/user/profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get user profile
+      description: Get the current logged-in user's profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  name:
+                    type: string
+                  email:
+                    type: string
+                  picture:
+                    type: string
+                  role_id:
+                    type: integer
+        "401":
+          description: No token provided
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "no token"
+        "403":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "invalid token"
+
+  # Product APIs
+  /api/v1/products:
+    get:
+      tags:
+        - Products
+      summary: Get all products
+      description: Get all product list with pagination
+      parameters:
+        - name: paging
+          in: query
+          description: Page number (starting from 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        "200":
+          description: Successfully retrieved product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+        "400":
+          description: No products on this page
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "No product in this page."
+        "403":
+          description: Page number parameter error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Page number should be positive integer"
+
+  /api/v1/products/{category}:
+    get:
+      tags:
+        - Products
+      summary: Get products by category
+      description: Get product list by category
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: Product category
+          schema:
+            type: string
+            enum: [men, women, accessories]
+        - name: paging
+          in: query
+          description: Page number (starting from 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        "200":
+          description: Successfully retrieved product list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+        "400":
+          description: No products on this page
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "No product in this page."
+        "403":
+          description: Page number parameter error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Page number should be positive integer"
+
+  /api/v1/products/search:
+    get:
+      tags:
+        - Products
+      summary: Search products
+      description: Search products by keyword
+      parameters:
+        - name: keyword
+          in: query
+          required: true
+          description: Search keyword
+          schema:
+            type: string
+        - name: paging
+          in: query
+          description: Page number (starting from 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        "200":
+          description: Successfully searched products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Product"
+        "400":
+          description: Missing keyword or no products on this page
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "keyword is required."
+        "403":
+          description: Page number parameter error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Page number should be positive integer"
+
+  /api/v1/products/details:
+    get:
+      tags:
+        - Products
+      summary: Get product details
+      description: Get product detailed information by product ID
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: Product ID
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Successfully retrieved product details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: "#/components/schemas/ProductDetail"
+        "400":
+          description: Missing product ID or product does not exist
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "This product does not exist."
+
+  # Order APIs
+  /api/v1/order/checkout:
+    post:
+      tags:
+        - Orders
+      summary: Checkout
+      description: Create new order and process payment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prime
+                - order
+              properties:
+                prime:
+                  type: string
+                  description: TapPay payment token
+                order:
+                  $ref: "#/components/schemas/OrderRequest"
+      responses:
+        "200":
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      number:
+                        type: integer
+                        description: Order number
+        "400":
+          description: Out of stock or product mismatch
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "out of stock"
+        "401":
+          description: No token provided
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "no token"
+        "403":
+          description: Invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "invalid token"
+
+  # Marketing APIs
+  /api/v1/marketing/campaigns:
+    get:
+      tags:
+        - Marketing
+      summary: Get marketing campaigns
+      description: Get all marketing campaign list
+      responses:
+        "200":
+          description: Successfully retrieved marketing campaigns
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Campaign"
+
+  # Report APIs
+  /api/v1/report/payments:
+    get:
+      tags:
+        - Reports
+      summary: Get user payment statistics
+      description: Get total payment amount for each user
+      responses:
+        "200":
+          description: Successfully retrieved payment statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user_id:
+                          type: string
+                        total_payment:
+                          type: integer
+
+  /api/v1/report/total:
+    get:
+      tags:
+        - Reports
+      summary: Get total sales
+      description: Get system total sales
+      responses:
+        "200":
+          description: Successfully retrieved total sales
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+
+  /api/v1/report/sold_color_percent:
+    get:
+      tags:
+        - Reports
+      summary: Get color sales percentage
+      description: Get sales percentage for each color product
+      responses:
+        "200":
+          description: Successfully retrieved color sales statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  soldColor:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        color_name:
+                          type: string
+                        color_code:
+                          type: string
+                        percentage:
+                          type: number
+
+  /api/v1/report/sold_price_percent:
+    get:
+      tags:
+        - Reports
+      summary: Get price range sales percentage
+      description: Get sales percentage for each price range
+      responses:
+        "200":
+          description: Successfully retrieved price sales statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  soldPrice:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        price_range:
+                          type: string
+                        percentage:
+                          type: number
+
+  /api/v1/report/top-five:
+    get:
+      tags:
+        - Reports
+      summary: Get top five best sellers
+      description: Get top five products by sales volume
+      responses:
+        "200":
+          description: Successfully retrieved best selling products
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  topFive:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        product_id:
+                          type: integer
+                        product_name:
+                          type: string
+                        total_sold:
+                          type: integer
+
+  # Admin APIs
+  /api/v1/admin/create_role:
+    post:
+      tags:
+        - Admin
+      summary: Create role
+      description: Create new user role
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+                - access
+              properties:
+                role:
+                  type: string
+                  description: Role name
+                access:
+                  type: string
+                  description: Role permissions
+      responses:
+        "200":
+          description: Role created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "New Role Successfully Created"
+
+  /api/v1/admin/assign_role:
+    post:
+      tags:
+        - Admin
+      summary: Assign role
+      description: Assign role to user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - userId
+                - roleId
+              properties:
+                userId:
+                  type: integer
+                  description: User ID
+                roleId:
+                  type: integer
+                  description: Role ID
+      responses:
+        "200":
+          description: Role assigned successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "New Role Successfully Assigned"
+
+  /api/v1/admin/create_product:
+    post:
+      tags:
+        - Admin
+      summary: Create product
+      description: Create new product
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - category
+                - title
+                - description
+                - price
+                - texture
+                - wash
+                - place
+                - note
+                - story
+                - variants
+                - main_image
+                - images
+              properties:
+                category:
+                  type: string
+                  enum: [men, women, accessories]
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                texture:
+                  type: string
+                wash:
+                  type: string
+                place:
+                  type: string
+                note:
+                  type: string
+                story:
+                  type: string
+                variants:
+                  type: string
+                  description: JSON format variant data
+                main_image:
+                  type: string
+                  format: binary
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        "200":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "success"
+
+  /api/v1/admin/create_campaign:
+    post:
+      tags:
+        - Admin
+      summary: Create marketing campaign
+      description: Create new marketing campaign
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - product_id
+                - story
+                - picture
+              properties:
+                product_id:
+                  type: integer
+                  description: Product ID
+                story:
+                  type: string
+                  description: Campaign story
+                picture:
+                  type: string
+                  format: binary
+                  description: Campaign picture
+      responses:
+        "200":
+          description: Campaign created successfully
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "New Product Successfully Created"
+        "400":
+          description: Selected product does not exist
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "chosen item does not exist"
+
+  /api/v1/admin/get_orders:
+    get:
+      tags:
+        - Admin
+      summary: Get order data
+      description: Get order data from external system
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved order data
+          content:
+            application/json:
+              schema:
+                type: object
+
+  # Cache Service Monitoring APIs
+  /api/v1/admin/system/cache/status:
+    get:
+      tags:
+        - Admin
+      summary: Get cache service status
+      description: Get Redis cache service status and statistics
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Cache service status retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: "true"
+                  data:
+                    type: object
+                    properties:
+                      status:
+                        type: object
+                        properties:
+                          isConnected:
+                            type: boolean
+                            description: Whether Redis is connected
+                            example: "true"
+                          lastHealthCheck:
+                            type: integer
+                            description: Last health check timestamp
+                            example: 1640995200000
+                          connectionRetryAttempts:
+                            type: integer
+                            description: Number of retry attempts
+                            example: 0
+                          maxRetryAttempts:
+                            type: integer
+                            description: Maximum retry attempts
+                            example: 5
+                          healthCheckInterval:
+                            type: integer
+                            description: Health check interval in milliseconds
+                            example: 30000
+                          timestamp:
+                            type: string
+                            format: date-time
+                            description: Current timestamp
+                            example: "2024-01-01T00:00:00.000Z"
+                      stats:
+                        type: object
+                        properties:
+                          keys:
+                            type: integer
+                            description: Number of cached keys
+                            example: 150
+                          info:
+                            type: object
+                            description: Redis server information
+                            example:
+                              redis_version: "6.2.6"
+                              connected_clients: "1"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        description: Response timestamp
+                        example: "2024-01-01T00:00:00.000Z"
+                  message:
+                    type: string
+                    example: "快取服務狀態獲取成功"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/admin/system/cache/health-check:
+    post:
+      tags:
+        - Admin
+      summary: Force cache health check
+      description: Manually trigger cache service health check
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Health check completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: "true"
+                  data:
+                    type: object
+                    properties:
+                      isHealthy:
+                        type: boolean
+                        description: Whether cache service is healthy
+                        example: "true"
+                      status:
+                        type: object
+                        properties:
+                          isConnected:
+                            type: boolean
+                            example: "true"
+                          lastHealthCheck:
+                            type: integer
+                            example: 1640995200000
+                          connectionRetryAttempts:
+                            type: integer
+                            example: 0
+                          maxRetryAttempts:
+                            type: integer
+                            example: 5
+                          healthCheckInterval:
+                            type: integer
+                            example: 30000
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: "2024-01-01T00:00:00.000Z"
+                      message:
+                        type: string
+                        example: "快取服務健康檢查通過"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2024-01-01T00:00:00.000Z"
+                  message:
+                    type: string
+                    example: "快取服務健康檢查通過"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/admin/system/cache/reconnect:
+    post:
+      tags:
+        - Admin
+      summary: Force cache reconnection
+      description: Manually trigger cache service reconnection
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Reconnection attempt completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: "true"
+                  data:
+                    type: object
+                    properties:
+                      reconnectSuccess:
+                        type: boolean
+                        description: Whether reconnection was successful
+                        example: "true"
+                      status:
+                        type: object
+                        properties:
+                          isConnected:
+                            type: boolean
+                            example: "true"
+                          lastHealthCheck:
+                            type: integer
+                            example: 1640995200000
+                          connectionRetryAttempts:
+                            type: integer
+                            example: 0
+                          maxRetryAttempts:
+                            type: integer
+                            example: 5
+                          healthCheckInterval:
+                            type: integer
+                            example: 30000
+                          timestamp:
+                            type: string
+                            format: date-time
+                            example: "2024-01-01T00:00:00.000Z"
+                      message:
+                        type: string
+                        example: "快取服務重連成功"
+                      timestamp:
+                        type: string
+                        format: date-time
+                        example: "2024-01-01T00:00:00.000Z"
+                  message:
+                    type: string
+                    example: "快取服務重連成功"
+        "401":
+          $ref: "#/components/responses/UnauthorizedError"
+        "403":
+          $ref: "#/components/responses/ForbiddenError"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /api/v1/admin/overview:
+    get:
+      tags:
+        - Admin
+      summary: Get system overview
+      description: Get overall system statistics for admin dashboard
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Successfully retrieved system overview
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      totalUsers:
+                        type: integer
+                        description: Total number of users
+                        example: 1234
+                      totalOrders:
+                        type: integer
+                        description: Total number of orders
+                        example: 567
+                      totalProducts:
+                        type: integer
+                        description: Total number of products
+                        example: 89
+                      totalRevenue:
+                        type: number
+                        description: Total revenue
+                        example: 1234567.89
+                      recentOrders:
+                        type: array
+                        description: Recent orders (last 5)
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            userId:
+                              type: integer
+                            total:
+                              type: number
+                            status:
+                              type: string
+                            createdAt:
+                              type: string
+                              format: date-time
+                      lowStockProducts:
+                        type: array
+                        description: Products with low stock (top 10)
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            title:
+                              type: string
+                            stock:
+                              type: integer
+        "401":
+          description: Unauthorized, missing or invalid token
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Unauthorized"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get system overview."
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: integer
+        category:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        texture:
+          type: string
+        wash:
+          type: string
+        place:
+          type: string
+        note:
+          type: string
+        story:
+          type: string
+        main_image:
+          type: string
+        created_time:
+          type: string
+          format: date-time
+
+    ProductDetail:
+      allOf:
+        - $ref: "#/components/schemas/Product"
+        - type: object
+          properties:
+            images:
+              type: array
+              items:
+                type: string
+            variants:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  color_name:
+                    type: string
+                  color_code:
+                    type: string
+                  size:
+                    type: string
+                  stock:
+                    type: integer
+
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: integer
+        product_id:
+          type: integer
+        picture:
+          type: string
+        story:
+          type: string
+        created_time:
+          type: string
+          format: date-time
+
+    OrderRequest:
+      type: object
+      required:
+        - list
+        - shipping
+        - payment
+        - freight
+        - recipient
+      properties:
+        list:
+          type: array
+          items:
+            type: object
+            required:
+              - id
+              - name
+              - qty
+              - color
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+              qty:
+                type: integer
+              color:
+                type: object
+                properties:
+                  name:
+                    type: string
+        shipping:
+          type: string
+        payment:
+          type: string
+        freight:
+          type: number
+        recipient:
+          type: object
+          required:
+            - name
+            - phone
+            - email
+            - address
+            - time
+          properties:
+            name:
+              type: string
+            phone:
+              type: string
+            email:
+              type: string
+            address:
+              type: string
+            time:
+              type: string
+
+  responses:
+    UnauthorizedError:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: string
+            example: "no token"
+
+    ForbiddenError:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            type: string
+            example: "invalid token"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: string
+            example: "404 Not Found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: string
+            example: "500 Internal Server Error"
