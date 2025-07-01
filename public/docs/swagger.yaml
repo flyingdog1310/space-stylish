@@ -16,6 +16,23 @@ info:
     Most APIs require JWT token authentication. Please include in the Authorization header:
     `Authorization: Bearer <your_jwt_token>`
 
+    ## Rate Limiting
+    - General APIs: 60 requests per second
+    - API endpoints: 30 requests per second
+    - Admin endpoints: 10 requests per second
+    - Health check and static resources are excluded
+
+    ## Response Format
+    All APIs return a standardized response format:
+    ```json
+    {
+      "success": true,
+      "data": {...},
+      "message": "Success message",
+      "timestamp": "2024-01-01T00:00:00.000Z"
+    }
+    ```
+
     ## Environment Variables
     - `API_VERSION`: API version (default: v1)
     - `SERVER_PORT`: Server port
@@ -25,7 +42,7 @@ info:
     - `APP_ID`: Facebook App ID
     - `APP_SECRET`: Facebook App Secret
 
-  version: 1.0.0
+  version: 2.0.0
   contact:
     name: Space-Stylish Team
     email: support@space-stylish.com
@@ -65,12 +82,42 @@ paths:
       description: Check if the API service is running normally
       responses:
         "200":
-          description: Service is normal
+          description: Service is healthy
           content:
             application/json:
               schema:
-                type: string
-                example: "ok"
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "healthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  checks:
+                    type: object
+                    properties:
+                      database:
+                        type: boolean
+                      redis:
+                        type: boolean
+                      server:
+                        type: boolean
+        "503":
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "unhealthy"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  checks:
+                    type: object
 
   # User authentication APIs
   /api/v1/user/signup:
@@ -121,16 +168,7 @@ paths:
                         type: integer
                         description: Token expiration time (seconds)
                       user:
-                        type: object
-                        properties:
-                          id:
-                            type: integer
-                          name:
-                            type: string
-                          email:
-                            type: string
-                          picture:
-                            type: string
+                        $ref: '#/components/schemas/User'
         "400":
           description: Request parameter error
           content:
@@ -200,23 +238,12 @@ paths:
                     properties:
                       access_token:
                         type: string
-                        description: JWT access token
                       access_expired:
                         type: integer
-                        description: Token expiration time (seconds)
                       user:
-                        type: object
-                        properties:
-                          id:
-                            type: integer
-                          name:
-                            type: string
-                          email:
-                            type: string
-                          picture:
-                            type: string
+                        $ref: '#/components/schemas/User'
         "400":
-          description: Request parameter error
+          description: Invalid request
           content:
             application/json:
               schema:
@@ -235,36 +262,25 @@ paths:
       tags:
         - Authentication
       summary: Get user profile
-      description: Get the current logged-in user's profile
+      description: Get current user profile information
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Successfully retrieved profile
+          description: Profile retrieved successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  name:
-                    type: string
-                  email:
-                    type: string
-                  picture:
-                    type: string
-                  role_id:
-                    type: integer
+                $ref: '#/components/schemas/User'
         "401":
-          description: No token provided
+          description: Unauthorized
           content:
             application/json:
               schema:
                 type: string
                 example: "no token"
         "403":
-          description: Invalid token
+          description: Forbidden
           content:
             application/json:
               schema:
@@ -272,96 +288,136 @@ paths:
                 example: "invalid token"
 
   # Product APIs
-  /api/v1/products/all:
-    get:
-      tags:
-        - Products
-      summary: Get all products
-      description: Get all product list with pagination
-      parameters:
-        - name: paging
-          in: query
-          description: Page number (starting from 0)
-          required: false
-          schema:
-            type: integer
-            default: 0
-            minimum: 0
-      responses:
-        "200":
-          description: Successfully retrieved product list
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Product"
-        "400":
-          description: No products on this page
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "No product in this page."
-        "403":
-          description: Page number parameter error
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "Page number should be positive integer"
-
-  /api/v1/products/{category}:
+  /api/v1/products:
     get:
       tags:
         - Products
       summary: Get products by category
-      description: Get product list by category
+      description: Get products with pagination and category filtering
       parameters:
         - name: category
-          in: path
-          required: true
+          in: query
           description: Product category
+          required: false
           schema:
             type: string
-            enum: [men, women, accessories]
+            enum: [all, women, men, accessories]
+            default: all
         - name: paging
           in: query
-          description: Page number (starting from 0)
+          description: Page number (0-based)
           required: false
           schema:
             type: integer
-            default: 0
             minimum: 0
+            default: 0
       responses:
         "200":
-          description: Successfully retrieved product list
+          description: Products retrieved successfully
           content:
             application/json:
               schema:
-                type: object
+                $ref: '#/components/schemas/Success'
                 properties:
                   data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Product"
+                    type: object
+                    properties:
+                      products:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Product'
+                      pagination:
+                        type: object
+                        properties:
+                          current:
+                            type: integer
+                          total:
+                            type: integer
+                          hasMore:
+                            type: boolean
+                          totalCount:
+                            type: integer
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    post:
+      tags:
+        - Products
+      summary: Create product
+      description: Create a new product (Admin only)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - title
+                - price
+                - category
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                category:
+                  type: string
+                  enum: [women, men, accessories]
+                texture:
+                  type: string
+                wash:
+                  type: string
+                place:
+                  type: string
+                note:
+                  type: string
+                story:
+                  type: string
+                main_image:
+                  type: string
+                variants:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      color_name:
+                        type: string
+                      color_code:
+                        type: string
+                      size:
+                        type: string
+                      stock:
+                        type: integer
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
         "400":
-          description: No products on this page
+          description: Bad request
           content:
             application/json:
               schema:
-                type: string
-                example: "No product in this page."
+                $ref: '#/components/schemas/Error'
         "403":
-          description: Page number parameter error
+          description: Forbidden
           content:
             application/json:
               schema:
-                type: string
-                example: "Page number should be positive integer"
+                $ref: '#/components/schemas/Error'
 
   /api/v1/products/search:
     get:
@@ -372,21 +428,287 @@ paths:
       parameters:
         - name: keyword
           in: query
-          required: true
           description: Search keyword
+          required: true
           schema:
             type: string
-        - name: paging
+        - name: page
           in: query
-          description: Page number (starting from 0)
+          description: Page number (0-based)
           required: false
           schema:
             type: integer
-            default: 0
             minimum: 0
+            default: 0
       responses:
         "200":
-          description: Successfully searched products
+          description: Search completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Product'
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product detail
+      description: Get detailed product information by ID
+      parameters:
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product detail retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Product'
+                  message:
+                    type: string
+                    example: "Product detail retrieved successfully"
+                  timestamp:
+                    type: string
+                    format: date-time
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      tags:
+        - Products
+      summary: Update product
+      description: Update product information (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                category:
+                  type: string
+                  enum: [women, men, accessories]
+                texture:
+                  type: string
+                wash:
+                  type: string
+                place:
+                  type: string
+                note:
+                  type: string
+                story:
+                  type: string
+                main_image:
+                  type: string
+                variants:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      color_name:
+                        type: string
+                      color_code:
+                        type: string
+                      size:
+                        type: string
+                      stock:
+                        type: integer
+                images:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                  message:
+                    type: string
+                    example: "Product updated successfully"
+                  timestamp:
+                    type: string
+                    format: date-time
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Product not found"
+                  timestamp:
+                    type: string
+                    format: date-time
+    delete:
+      tags:
+        - Products
+      summary: Delete product
+      description: Soft delete a product (Admin only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                  message:
+                    type: string
+                    example: "Product deleted successfully"
+                  timestamp:
+                    type: string
+                    format: date-time
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Product not found"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/products/{id}/variants:
+    get:
+      tags:
+        - Products
+      summary: Get product variants
+      description: Get all variants of a specific product
+      parameters:
+        - name: id
+          in: path
+          description: Product ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Product variants retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        color_code:
+                          type: string
+                        size:
+                          type: string
+                        stock:
+                          type: integer
+                  message:
+                    type: string
+                    example: "Product variants retrieved successfully"
+                  timestamp:
+                    type: string
+                    format: date-time
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: "Product not found"
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  # Marketing APIs
+  /api/v1/marketing/campaigns:
+    get:
+      tags:
+        - Marketing
+      summary: Get marketing campaigns
+      description: Get all active marketing campaigns
+      responses:
+        "200":
+          description: Campaigns retrieved successfully
           content:
             application/json:
               schema:
@@ -395,60 +717,22 @@ paths:
                   data:
                     type: array
                     items:
-                      $ref: "#/components/schemas/Product"
-        "400":
-          description: Missing keyword or no products on this page
+                      $ref: '#/components/schemas/Campaign'
+        "500":
+          description: Internal server error
           content:
             application/json:
               schema:
                 type: string
-                example: "keyword is required."
-        "403":
-          description: Page number parameter error
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "Page number should be positive integer"
-
-  /api/v1/products/details:
-    get:
-      tags:
-        - Products
-      summary: Get product details
-      description: Get product detailed information by product ID
-      parameters:
-        - name: id
-          in: query
-          required: true
-          description: Product ID
-          schema:
-            type: integer
-      responses:
-        "200":
-          description: Successfully retrieved product details
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    $ref: "#/components/schemas/ProductDetail"
-        "400":
-          description: Missing product ID or product does not exist
-          content:
-            application/json:
-              schema:
-                type: string
-                example: "This product does not exist."
+                example: "Failed to get campaigns"
 
   # Order APIs
   /api/v1/order/checkout:
     post:
       tags:
         - Orders
-      summary: Checkout
-      description: Create new order and process payment
+      summary: Create order
+      description: Create a new order with checkout process
       security:
         - bearerAuth: []
       requestBody:
@@ -463,9 +747,46 @@ paths:
               properties:
                 prime:
                   type: string
-                  description: TapPay payment token
+                  description: TapPay prime
                 order:
-                  $ref: "#/components/schemas/OrderRequest"
+                  type: object
+                  properties:
+                    shipping:
+                      type: string
+                    payment:
+                      type: string
+                    subtotal:
+                      type: number
+                    freight:
+                      type: number
+                    total:
+                      type: number
+                    recipient:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        phone:
+                          type: string
+                        email:
+                          type: string
+                        address:
+                          type: string
+                        time:
+                          type: string
+                    list:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: integer
+                          color_code:
+                            type: string
+                          size:
+                            type: string
+                          qty:
+                            type: integer
       responses:
         "200":
           description: Order created successfully
@@ -479,150 +800,146 @@ paths:
                     properties:
                       number:
                         type: integer
-                        description: Order number
+                        description: Order ID
         "400":
-          description: Out of stock or product mismatch
+          description: Bad request
           content:
             application/json:
               schema:
                 type: string
                 example: "out of stock"
         "401":
-          description: No token provided
+          description: Unauthorized
           content:
             application/json:
               schema:
                 type: string
                 example: "no token"
         "403":
-          description: Invalid token
+          description: Forbidden
           content:
             application/json:
               schema:
                 type: string
                 example: "invalid token"
-
-  # Marketing APIs
-  /api/v1/marketing/campaigns:
-    get:
-      tags:
-        - Marketing
-      summary: Get marketing campaigns
-      description: Get all marketing campaign list
-      responses:
-        "200":
-          description: Successfully retrieved marketing campaigns
+        "500":
+          description: Internal server error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/Campaign"
+                type: string
+                example: "Failed to process checkout"
 
   # Report APIs
   /api/v1/report/payments:
     get:
       tags:
         - Reports
-      summary: Get user payment statistics
-      description: Get total payment amount for each user
+      summary: Get payments report
+      description: Get payments analytics report
       responses:
         "200":
-          description: Successfully retrieved payment statistics
+          description: Report retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   data:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        user_id:
-                          type: string
-                        total_payment:
-                          type: integer
+                    type: object
+                    description: Payment report data
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get payments report"
 
   /api/v1/report/total:
     get:
       tags:
         - Reports
       summary: Get total sales
-      description: Get system total sales
+      description: Get total sales amount
       responses:
         "200":
-          description: Successfully retrieved total sales
+          description: Total sales retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   total:
-                    type: integer
+                    type: number
+                    description: Total sales amount
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get total sales"
 
   /api/v1/report/sold_color_percent:
     get:
       tags:
         - Reports
-      summary: Get color sales percentage
-      description: Get sales percentage for each color product
+      summary: Get sold color percentage
+      description: Get percentage of sold products by color
       responses:
         "200":
-          description: Successfully retrieved color sales statistics
+          description: Color percentage retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   soldColor:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        color_name:
-                          type: string
-                        color_code:
-                          type: string
-                        percentage:
-                          type: number
+                    type: object
+                    description: Color percentage data
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get sold color percent"
 
   /api/v1/report/sold_price_percent:
     get:
       tags:
         - Reports
-      summary: Get price range sales percentage
-      description: Get sales percentage for each price range
+      summary: Get sold price percentage
+      description: Get percentage of sold products by price range
       responses:
         "200":
-          description: Successfully retrieved price sales statistics
+          description: Price percentage retrieved successfully
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   soldPrice:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        price_range:
-                          type: string
-                        percentage:
-                          type: number
+                    type: object
+                    description: Price percentage data
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get sold price percent"
 
   /api/v1/report/top-five:
     get:
       tags:
         - Reports
-      summary: Get top five best sellers
-      description: Get top five products by sales volume
+      summary: Get top five products
+      description: Get top five selling products
       responses:
         "200":
-          description: Successfully retrieved best selling products
+          description: Top five products retrieved successfully
           content:
             application/json:
               schema:
@@ -632,13 +949,14 @@ paths:
                     type: array
                     items:
                       type: object
-                      properties:
-                        product_id:
-                          type: integer
-                        product_name:
-                          type: string
-                        total_sold:
-                          type: integer
+                      description: Product sales data
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get top five products"
 
   # Admin APIs
   /admin/create_role:
@@ -646,7 +964,7 @@ paths:
       tags:
         - Admin
       summary: Create role
-      description: Create new user role
+      description: Create a new user role (Admin only)
       security:
         - bearerAuth: []
       requestBody:
@@ -664,7 +982,7 @@ paths:
                   description: Role name
                 access:
                   type: string
-                  description: Role permissions
+                  description: Role access permissions
       responses:
         "200":
           description: Role created successfully
@@ -673,13 +991,20 @@ paths:
               schema:
                 type: string
                 example: "New Role Successfully Created"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to create role"
 
   /admin/assign_role:
     post:
       tags:
         - Admin
-      summary: Assign role
-      description: Assign role to user
+      summary: Assign role to user
+      description: Assign a role to a specific user (Admin only)
       security:
         - bearerAuth: []
       requestBody:
@@ -706,13 +1031,20 @@ paths:
               schema:
                 type: string
                 example: "New Role Successfully Assigned"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to assign role"
 
   /admin/create_product:
     post:
       tags:
         - Admin
-      summary: Create product
-      description: Create new product
+      summary: Create product with images
+      description: Create a new product with image uploads (Admin only)
       security:
         - bearerAuth: []
       requestBody:
@@ -724,20 +1056,21 @@ paths:
               required:
                 - category
                 - title
-                - description
                 - price
-                - texture
-                - wash
-                - place
-                - note
-                - story
-                - variants
-                - main_image
-                - images
               properties:
+                main_image:
+                  type: string
+                  format: binary
+                  description: Main product image
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Additional product images
                 category:
                   type: string
-                  enum: [men, women, accessories]
+                  enum: [women, men, accessories]
                 title:
                   type: string
                 description:
@@ -755,16 +1088,18 @@ paths:
                 story:
                   type: string
                 variants:
-                  type: string
-                  description: JSON format variant data
-                main_image:
-                  type: string
-                  format: binary
-                images:
                   type: array
                   items:
-                    type: string
-                    format: binary
+                    type: object
+                    properties:
+                      color_name:
+                        type: string
+                      color_code:
+                        type: string
+                      size:
+                        type: string
+                      stock:
+                        type: integer
       responses:
         "200":
           description: Product created successfully
@@ -773,13 +1108,20 @@ paths:
               schema:
                 type: string
                 example: "success"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to create product"
 
   /admin/create_campaign:
     post:
       tags:
         - Admin
       summary: Create marketing campaign
-      description: Create new marketing campaign
+      description: Create a new marketing campaign (Admin only)
       security:
         - bearerAuth: []
       requestBody:
@@ -791,18 +1133,17 @@ paths:
               required:
                 - product_id
                 - story
-                - picture
               properties:
-                product_id:
-                  type: integer
-                  description: Product ID
-                story:
-                  type: string
-                  description: Campaign story
                 picture:
                   type: string
                   format: binary
-                  description: Campaign picture
+                  description: Campaign image
+                product_id:
+                  type: integer
+                  description: Associated product ID
+                story:
+                  type: string
+                  description: Campaign story
       responses:
         "200":
           description: Campaign created successfully
@@ -810,30 +1151,45 @@ paths:
             application/json:
               schema:
                 type: string
-                example: "New Product Successfully Created"
+                example: "New Campaign Successfully Created"
         "400":
-          description: Selected product does not exist
+          description: Bad request
           content:
             application/json:
               schema:
                 type: string
                 example: "chosen item does not exist"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to create campaign"
 
   /admin/get_orders:
     get:
       tags:
         - Admin
-      summary: Get order data
-      description: Get order data from external system
+      summary: Get orders from external system
+      description: Get orders from Azole system (Admin only)
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Successfully retrieved order data
+          description: Orders retrieved successfully
           content:
             application/json:
               schema:
                 type: object
+                description: Orders data from external system
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: string
+                example: "Failed to get orders"
 
 components:
   securitySchemes:
@@ -843,60 +1199,147 @@ components:
       bearerFormat: JWT
 
   schemas:
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+        message:
+          type: string
+          example: "Error message"
+        timestamp:
+          type: string
+          format: date-time
+    Success:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        message:
+          type: string
+          example: "Success message"
+        timestamp:
+          type: string
+          format: date-time
     Product:
       type: object
       properties:
         id:
           type: integer
+          example: 1
         category:
           type: string
+          enum: [women, men, accessories]
+          example: "women"
         title:
           type: string
+          example: "Summer Dress"
         description:
           type: string
+          example: "Beautiful summer dress"
         price:
           type: number
+          example: 1000
         texture:
           type: string
+          example: "Cotton"
         wash:
           type: string
+          example: "Machine wash"
         place:
           type: string
+          example: "Taiwan"
         note:
           type: string
+          example: "Note about the product"
         story:
           type: string
+          example: "Product story"
         main_image:
+          type: string
+          example: "/images/product1.jpg"
+        colors:
+          type: array
+          items:
+            type: object
+            properties:
+              code:
+                type: string
+                example: "#FF0000"
+              name:
+                type: string
+                example: "Red"
+        sizes:
+          type: array
+          items:
+            type: string
+          example: ["S", "M", "L"]
+        variants:
+          type: array
+          items:
+            type: object
+            properties:
+              color_name:
+                type: string
+              color_code:
+                type: string
+              size:
+                type: string
+              stock:
+                type: integer
+        images:
+          type: array
+          items:
+            type: string
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        picture:
+          type: string
+        role_id:
+          type: integer
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        shipping:
+          type: string
+        payment:
+          type: string
+        subtotal:
+          type: number
+        freight:
+          type: number
+        total:
+          type: number
+        name:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        status:
           type: string
         created_time:
           type: string
           format: date-time
-
-    ProductDetail:
-      allOf:
-        - $ref: "#/components/schemas/Product"
-        - type: object
-          properties:
-            images:
-              type: array
-              items:
-                type: string
-            variants:
-              type: array
-              items:
-                type: object
-                properties:
-                  id:
-                    type: integer
-                  color_name:
-                    type: string
-                  color_code:
-                    type: string
-                  size:
-                    type: string
-                  stock:
-                    type: integer
-
     Campaign:
       type: object
       properties:
@@ -911,92 +1354,3 @@ components:
         created_time:
           type: string
           format: date-time
-
-    OrderRequest:
-      type: object
-      required:
-        - list
-        - shipping
-        - payment
-        - freight
-        - recipient
-      properties:
-        list:
-          type: array
-          items:
-            type: object
-            required:
-              - id
-              - name
-              - qty
-              - color
-            properties:
-              id:
-                type: integer
-              name:
-                type: string
-              qty:
-                type: integer
-              color:
-                type: object
-                properties:
-                  name:
-                    type: string
-        shipping:
-          type: string
-        payment:
-          type: string
-        freight:
-          type: number
-        recipient:
-          type: object
-          required:
-            - name
-            - phone
-            - email
-            - address
-            - time
-          properties:
-            name:
-              type: string
-            phone:
-              type: string
-            email:
-              type: string
-            address:
-              type: string
-            time:
-              type: string
-
-  responses:
-    UnauthorizedError:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            type: string
-            example: "no token"
-
-    ForbiddenError:
-      description: Forbidden
-      content:
-        application/json:
-          schema:
-            type: string
-            example: "invalid token"
-
-    NotFoundError:
-      description: Resource not found
-      content:
-        application/json:
-          schema:
-            type: string
-            example: "404 Not Found"
-
-    InternalServerError:
-      description: Internal server error
-      content:
-        application/json:
-          schema:
-            type: string
-            example: "500 Internal Server Error"

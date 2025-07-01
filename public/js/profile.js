@@ -19,7 +19,7 @@ if (localStorage.getItem("jwtToken") !== null) {
     let token = localStorage.getItem("jwtToken");
     $.ajax({
         type: "GET",
-        url: "/api/1.0/user/profile",
+        url: "/api/v1/user/profile",
         beforeSend: function (xhr) {
             xhr.setRequestHeader("Authorization", `Bearer ${token}`);
         },
@@ -173,7 +173,7 @@ $(`#sign-in-btn`).on("click", function () {
 $("#sign-up").submit(function (e) {
     e.preventDefault();
     $.ajax({
-        url: "/api/1.0/user/signup",
+        url: "/api/v1/user/signup",
         type: "post",
         data: $("#sign-up").serialize(),
         success: function (data) {
@@ -188,7 +188,7 @@ $("#sign-up").submit(function (e) {
 $("#sign-in").submit(function (e) {
     e.preventDefault();
     $.ajax({
-        url: "/api/1.0/user/signin",
+        url: "/api/v1/user/signin",
         type: "post",
         data: $("#sign-in").serialize(),
         success: function (data) {

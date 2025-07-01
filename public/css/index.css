@@ -1,9 +1,42 @@
+/* =================================MODERN CSS VARIABLES==================================== */
+:root {
+    --primary-color: #000000;
+    --secondary-color: #8b572a;
+    --text-color: #3f3a3a;
+    --border-color: #979797;
+    --background-color: #ffffff;
+    --header-height: 100px;
+    --border-radius: 20px;
+    --transition: all 0.3s ease;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* =================================RESPONSIVE BREAKPOINTS==================================== */
+@media (max-width: 768px) {
+    :root {
+        --header-height: 80px;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --header-height: 60px;
+    }
+}
+
 /* =================================GLOBAL==================================== */
+
+* {
+    box-sizing: border-box;
+}
 
 body {
     display: flex;
     flex-direction: column;
     margin: 0;
+    font-family: "Noto Sans TC", sans-serif;
+    line-height: 1.6;
+    color: var(--text-color);
 }
 
 li {
@@ -12,12 +45,20 @@ li {
 
 a {
     text-decoration: none;
-    color: black;
+    color: var(--text-color);
+    transition: var(--transition);
+}
+
+a:hover {
+    color: var(--secondary-color);
 }
 
 ul {
     list-style-type: none;
+    margin: 0;
+    padding: 0;
 }
+
 #search {
     padding: 0;
     background: none;
@@ -28,22 +69,30 @@ ul {
     -moz-appearance: none;
     appearance: none;
 }
-.btn{
+
+.btn {
     width: 360px;
     height: 64px;
-    background: #000000;
-    border: 1px solid #979797;
+    background: var(--primary-color);
+    border: 1px solid var(--border-color);
     font-family: "Noto Sans TC";
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
     line-height: 30px;
     letter-spacing: 4px;
-    color: #ffffff;
-}
-.btn:hover{
+    color: var(--background-color);
+    transition: var(--transition);
     cursor: pointer;
+    border-radius: 4px;
 }
+
+.btn:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
+}
+
 /* =================================HEADER==================================== */
 #header {
     display: flex;
@@ -51,18 +100,27 @@ ul {
     justify-content: center;
     position: fixed;
     z-index: 2;
-    height: 100px;
+    height: var(--header-height);
     width: 100vw;
     border-bottom: 40px;
-    background-color: #ffffff;
+    background-color: var(--background-color);
+    box-shadow: var(--box-shadow);
 }
+
 #logo {
     height: 48px;
     margin: 30px;
+    transition: var(--transition);
 }
+
+#logo:hover {
+    transform: scale(1.05);
+}
+
 .block-header {
-    color: #3f3a3a;
+    color: var(--text-color);
 }
+
 #category-list {
     display: flex;
     align-items: center;
@@ -80,29 +138,41 @@ ul {
     text-align: center;
     letter-spacing: 30px;
     text-indent: 30px;
-    color: #3f3a3a;
-}
-.category:hover {
+    color: var(--text-color);
+    transition: var(--transition);
     cursor: pointer;
-    color: #8b572a;
+}
+
+.category:hover {
+    color: var(--secondary-color);
+    transform: translateY(-2px);
 }
 
 #search-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid #979797;
-    border-radius: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
     margin-right: 30px;
     width: 214px;
     height: 44px;
+    transition: var(--transition);
 }
+
+#search-bar:focus-within {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(139, 87, 42, 0.2);
+}
+
 #search-btn {
     all: unset;
-}
-#search-btn:hover {
     cursor: pointer;
-    background: url("/public/ui/search-hover.png");
+    transition: var(--transition);
+}
+
+#search-btn:hover {
+    transform: scale(1.1);
 }
 
 #cart {
@@ -110,30 +180,39 @@ ul {
     width: 44px;
     height: 44px;
     margin-right: 30px;
-}
-#cart:hover {
+    transition: var(--transition);
     cursor: pointer;
-    background: url("/public/ui/cart-hover.png");
 }
+
+#cart:hover {
+    background: url("/public/ui/cart-hover.png");
+    transform: scale(1.1);
+}
+
 #member {
     width: 44px;
     height: 44px;
     margin-right: 70px;
-}
-#member:hover {
+    transition: var(--transition);
     cursor: pointer;
-    background: url("/public/ui/member-hover.png");
 }
+
+#member:hover {
+    background: url("/public/ui/member-hover.png");
+    transform: scale(1.1);
+}
+
 #header-hr {
     position: fixed;
     z-index: 2;
-    top: 100px;
+    top: var(--header-height);
     height: 40px;
     width: 100%;
     border: 0px;
     margin: 0px;
     background-color: #313538;
 }
+
 /* =================================BODY==================================== */
 #header-stuff {
     height: 140px;
@@ -141,15 +220,23 @@ ul {
     margin: 0px;
     background-color: #313538;
 }
+
 #campaign {
     display: flex;
     justify-content: center;
     background-color: #828282;
 }
+
 #campaign-picture {
     cursor: pointer;
     height: 500px;
+    transition: var(--transition);
 }
+
+#campaign-picture:hover {
+    transform: scale(1.02);
+}
+
 #campaign-story {
     position: absolute;
     width: 300px;
@@ -166,6 +253,7 @@ ul {
     font-size: 30px;
     line-height: 57px;
 }
+
 #campaign-foot {
     margin: 0px;
     font-family: "Noto Sans TC";
@@ -180,13 +268,18 @@ ul {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
+
 .product-row {
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 40px;
+    flex-wrap: wrap;
+    gap: 20px;
 }
+
 .products {
     cursor: pointer;
     display: flex;
@@ -195,23 +288,37 @@ ul {
     justify-content: top;
     margin: 5px;
     height: 580px;
+    transition: var(--transition);
+    border-radius: 8px;
+    overflow: hidden;
 }
+
+.products:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow);
+}
+
 .product-img {
     margin: 5px;
-    width: 360px;
-    height: 480px;
-    background-color: #ffffff;
+    transition: var(--transition);
 }
+
+.products:hover .product-img {
+    transform: scale(1.05);
+}
+
 .product-color {
     display: flex;
     margin: 3px;
 }
+
 .product-color-block {
     margin: 3px;
     border: 1px solid #d3d3d3;
     height: 24px;
     width: 24px;
 }
+
 .product-name {
     font-family: "Noto Sans TC";
     font-style: normal;
@@ -220,6 +327,7 @@ ul {
     line-height: 24px;
     margin: 3px;
 }
+
 .product-price {
     font-family: "Noto Sans TC";
     font-style: normal;
@@ -239,6 +347,7 @@ ul {
     align-items: center;
     justify-content: center;
 }
+
 #footer-ul {
     display: flex;
     align-items: center;
@@ -246,6 +355,7 @@ ul {
     margin-left: 80px;
     margin-right: auto;
 }
+
 .about {
     width: 8vw;
     font-family: "Noto Sans TC";
@@ -256,14 +366,17 @@ ul {
     text-align: center;
     color: #f5f5f5;
 }
+
 .block-footer {
     color: #828282;
 }
+
 .social-media {
     width: 50px;
     height: 50px;
     margin-right: 20px;
 }
+
 #copyright {
     font-family: "Noto Sans TC";
     font-style: normal;

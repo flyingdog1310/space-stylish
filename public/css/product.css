@@ -1,18 +1,47 @@
+/* =================================MODERN CSS VARIABLES==================================== */
+:root {
+    --primary-color: #000000;
+    --secondary-color: #8b572a;
+    --text-color: #3f3a3a;
+    --border-color: #979797;
+    --background-color: #ffffff;
+    --disabled-color: #bababa;
+    --hover-color: #ececec;
+    --transition: all 0.3s ease;
+    --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --border-radius: 8px;
+}
+
+/* =================================GLOBAL STYLES==================================== */
+* {
+    box-sizing: border-box;
+}
+
 #product-page {
     display: flex;
     flex-direction: column;
     margin-top: 30px;
+    padding: 0 20px;
 }
 #product-top {
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
 }
 #product-main-img {
     margin: 20px;
     width: 560px;
     height: 746px;
     background: #313538;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    cursor: pointer;
+}
+#product-main-img:hover {
+    transform: scale(1.02);
+    box-shadow: var(--box-shadow);
 }
 #product-info {
     margin: 20px;
@@ -28,7 +57,7 @@
     font-size: 32px;
     line-height: 38px;
     letter-spacing: 6.4px;
-    color: #3f3a3a;
+    color: var(--text-color);
 }
 #product-id {
     font-family: "Noto Sans TC";
@@ -37,7 +66,7 @@
     font-size: 20px;
     line-height: 24px;
     letter-spacing: 4px;
-    color: #bababa;
+    color: var(--disabled-color);
 }
 #product-price {
     margin: 25px 0px;
@@ -46,10 +75,10 @@
     font-weight: 400;
     font-size: 30px;
     line-height: 36px;
-    color: #3f3a3a;
+    color: var(--text-color);
 }
 #product-top-hr {
-    border: #3f3a3a;
+    border: var(--text-color);
     border-style: inset;
     border-width: 1px;
 }
@@ -57,6 +86,7 @@
     display: flex;
     align-items: center;
     height: 70px;
+    gap: 20px;
 }
 .product-tag {
     font-family: "Noto Sans TC";
@@ -65,35 +95,39 @@
     font-size: 20px;
     line-height: 24px;
     letter-spacing: 4px;
-    color: #3f3a3a;
+    color: var(--text-color);
 }
 .product-tag::after {
     margin-right: 20px;
     content: "|";
-    color: #3f3a3a;
+    color: var(--text-color);
 }
 .product-color-input {
-    visibility: "hidden";
+    visibility: hidden;
     height: 0;
     width: 0;
 }
 .product-color-blocks {
     box-sizing: border-box;
-    cursor: "pointer";
+    cursor: pointer;
     margin-right: 10px;
-    border: 6px solid #ffffff;
+    border: 6px solid var(--background-color);
     height: 36px;
     width: 36px;
     box-shadow: 0px 0px 2px #bbbbbb;
+    transition: var(--transition);
+    border-radius: 50%;
 }
 .product-color-input:enabled + .product-color-blocks:hover {
     cursor: pointer;
+    transform: scale(1.1);
 }
 .product-color-input:checked + .product-color-blocks {
-    box-shadow: 0px 0px 2px #000000;
+    box-shadow: 0px 0px 4px var(--primary-color);
+    border-color: var(--primary-color);
 }
 .product-size-input {
-    visibility: "hidden";
+    visibility: hidden;
     height: 0;
     width: 0;
 }
@@ -104,18 +138,25 @@
     margin-right: 10px;
     width: 36px;
     height: 36px;
-    background: #ececec;
+    background: var(--hover-color);
     border-radius: 18px;
+    transition: var(--transition);
+    cursor: pointer;
 }
 .product-size-input:enabled + .product-size-block:hover {
     cursor: pointer;
+    background: var(--secondary-color);
+    color: var(--background-color);
+    transform: scale(1.1);
 }
 .product-size-input:disabled + .product-size-block {
-    background: #ffffff;
+    background: var(--background-color);
+    color: var(--disabled-color);
+    cursor: not-allowed;
 }
 .product-size-input:checked + .product-size-block {
-    color: #ffffff;
-    background: #000000;
+    color: var(--background-color);
+    background: var(--primary-color);
 }
 #qty-box {
     display: flex;
@@ -123,12 +164,26 @@
     justify-content: center;
     width: 160px;
     height: 44px;
-    background: #ffffff;
-    border: 1px solid #979797;
+    background: var(--background-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+#qty-box:focus-within {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 2px rgba(139, 87, 42, 0.2);
 }
 #minus,
 #plus {
     all: unset;
+    cursor: pointer;
+    padding: 8px;
+    transition: var(--transition);
+    border-radius: 4px;
+}
+#minus:hover,
+#plus:hover {
+    background: var(--hover-color);
 }
 #qty {
     width: 80px;
@@ -147,35 +202,43 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 32px;
-    color: #8b572a;
+    color: var(--secondary-color);
 }
 #add-cart {
     width: 360px;
     height: 64px;
-    background: #000000;
-    border: 1px solid #979797;
+    background: var(--primary-color);
+    border: 1px solid var(--border-color);
     font-family: "Noto Sans TC";
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
     line-height: 30px;
     letter-spacing: 4px;
-    color: #ffffff;
-}
-#add-cart:enabled:hover {
+    color: var(--background-color);
+    transition: var(--transition);
+    border-radius: var(--border-radius);
     cursor: pointer;
 }
-#add-cart:disabled {
-    background: #979797;
+#add-cart:enabled:hover {
+    background: var(--secondary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow);
 }
-
+#add-cart:disabled {
+    background: var(--disabled-color);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
 .product-note {
     font-family: "Noto Sans TC";
     font-style: normal;
     font-weight: 400;
     font-size: 20px;
     line-height: 30px;
-    color: #3f3a3a;
+    color: var(--text-color);
+    margin-top: 20px;
 }
 #product-bottom {
     display: flex;
@@ -183,12 +246,13 @@
     align-items: center;
     align-self: center;
     width: 65vw;
+    margin-top: 40px;
 }
 #product-details {
     width: 65vw;
 }
 #details-wrapper {
-    background-color: #ffffff;
+    background-color: var(--background-color);
     width: 200px;
 }
 #details {
@@ -198,7 +262,12 @@
     font-size: 20px;
     line-height: 30px;
     letter-spacing: 3px;
-    color: #8b572a;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: var(--transition);
+}
+#details:hover {
+    color: var(--secondary-color);
 }
 #product-bottom-hr-wrapper {
     z-index: -1;

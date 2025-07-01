@@ -5,7 +5,7 @@ let search = "";
 let campaigns;
 let products;
 
-$.getJSON(`${window.location.origin}/api/1.0/marketing/campaigns`, function (campaigns) {
+$.getJSON(`${window.location.origin}/api/v1/marketing/campaigns`, function (campaigns) {
     $("#campaign-picture").prop("src", `${campaigns.data[0].picture}`);
     $("#campaign-link").prop(`href`, `${window.location.origin}/product?id=${campaigns.data[0].product_id}`);
     const storyAll = campaigns.data[0].story;
@@ -31,64 +31,64 @@ if (searchParams.get("keyword") !== null) {
     search = searchParams.get("keyword");
 }
 if (search == "") {
-    $.getJSON(`${window.location.origin}/api/1.0/products/${category}`, function (products) {
-        if (products.data === undefined) {
+    $.getJSON(`${window.location.origin}/api/v1/products?category=${category}`, function (products) {
+        if (products.data.products === undefined) {
             $(".product-row").css("display", "none");
             $("#no-result").text("currently no product to show");
             return;
         }
-        if (products.data.length <= 3) {
+        if (products.data.products.length <= 3) {
             $("#bottom-row").css("display", "none");
         }
-        for (let i = 0; i < products.data.length; i++) {
-            $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data[i].id}`);
+        for (let i = 0; i < products.data.products.length; i++) {
+            $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data.products[i].id}`);
             $(`#product${i}-img`).ready(function () {
-                $(`#product${i}-img`).css("background-image", `url(${products.data[i].main_image})`);
+                $(`#product${i}-img`).css("background-image", `url(${products.data.products[i].main_image})`);
             });
-            for (let j = 0; j < products.data[i].colors.length; j++) {
+            for (let j = 0; j < products.data.products[i].colors.length; j++) {
                 $("<div>", {
                     id: `product${i}-color-block${j}`,
                     class: `product-color-block`,
-                    style: `background-color: #${products.data[i].colors[j].code}`,
+                    style: `background-color: #${products.data.products[i].colors[j].code}`,
                 }).appendTo(`#product${i}-color`);
             }
             $(`#product${i}-name`).ready(function () {
-                $(`#product${i}-name`).text(products.data[i].title);
+                $(`#product${i}-name`).text(products.data.products[i].title);
             });
             $(`#product${i}-price`).ready(function () {
-                $(`#product${i}-price`).text(`TWD.${products.data[i].price}`);
+                $(`#product${i}-price`).text(`TWD.${products.data.products[i].price}`);
             });
         }
     });
 }
 
 if (search !== "") {
-    $.getJSON(`${window.location.origin}/api/1.0/products/search?keyword=${search}`, function (products) {
-        if (products.data === undefined) {
+    $.getJSON(`${window.location.origin}/api/v1/products/search?keyword=${search}`, function (products) {
+        if (products.data.products === undefined) {
             $(".product-row").css("display", "none");
             $("#no-result").text("currently no product to show");
             return;
         }
-        if (products.data.length <= 3) {
+        if (products.data.products.length <= 3) {
             $("#bottom-row").css("display", "none");
         }
-        for (let i = 0; i < products.data.length; i++) {
-            $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data[i].id}`);
+        for (let i = 0; i < products.data.products.length; i++) {
+            $(`#product${i}`).prop(`href`, `${window.location.origin}/product?id=${products.data.products[i].id}`);
             $(`#product${i}-img`).ready(function () {
-                $(`#product${i}-img`).css("background-image", `url(${products.data[i].main_image})`);
+                $(`#product${i}-img`).css("background-image", `url(${products.data.products[i].main_image})`);
             });
-            for (let j = 0; j < products.data[i].colors.length; j++) {
+            for (let j = 0; j < products.data.products[i].colors.length; j++) {
                 $("<div>", {
                     id: `product${i}-color-block${j}`,
                     class: `product-color-block`,
-                    style: `background-color: #${products.data[i].colors[j].code}`,
+                    style: `background-color: #${products.data.products[i].colors[j].code}`,
                 }).appendTo(`#product${i}-color`);
             }
             $(`#product${i}-name`).ready(function () {
-                $(`#product${i}-name`).text(products.data[i].title);
+                $(`#product${i}-name`).text(products.data.products[i].title);
             });
             $(`#product${i}-price`).ready(function () {
-                $(`#product${i}-price`).text(`TWD.${products.data[i].price}`);
+                $(`#product${i}-price`).text(`TWD.${products.data.products[i].price}`);
             });
         }
     });
